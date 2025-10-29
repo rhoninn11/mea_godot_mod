@@ -1,0 +1,60 @@
+From b32199b79b9dca9c69e1e344abd9baf3230cfbdc Mon Sep 17 00:00:00 2001
+From: leszek <rhoninn11@gmail.com>
+Date: Wed, 8 Oct 2025 16:01:03 +0200
+Subject: [PATCH 3/3] - faults fixed
+
+---
+ modules/csg/csg_customs.cpp | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/modules/csg/csg_customs.cpp b/modules/csg/csg_customs.cpp
+index 3ff91290c0..7c497954e4 100644
+--- a/modules/csg/csg_customs.cpp
++++ b/modules/csg/csg_customs.cpp
+@@ -4,10 +4,10 @@
+ 
+ inline Transform3D as_transform(PackedFloat32Array farr) {
+ 	Vector3 vs[4] = {
+-		Vector3(farr[0], farr[1], farr[2]),
+-		Vector3(farr[3], farr[4], farr[5]),
+-		Vector3(farr[6], farr[7], farr[8]),
+-		Vector3(farr[9], farr[10], farr[11]),
++		Vector3(farr[0], farr[4], farr[8]),
++		Vector3(farr[1], farr[5], farr[9]),
++		Vector3(farr[2], farr[6], farr[10]),
++		Vector3(farr[3], farr[7], farr[11]),
+ 	};
+ 
+ 	return Transform3D(vs[0], vs[1], vs[2], vs[3]);
+@@ -16,13 +16,18 @@ inline Transform3D as_transform(PackedFloat32Array farr) {
+ CSGBrush *CSGAlongTransform::_build_brush() {
+ 	CSGBrush *new_brush = memnew(CSGBrush);
+ 	if (mode == Mode::PREP_MODE ){
+-		print_line("W: Execute in prep mode !!!");
++		print_line("W: Execute in prep mode !");
+ 		return new_brush;
+ 	}
+ 	
+ 	if (polygon.size() < 3) {
+ 		return new_brush;
+ 	}
++	constexpr int t_size = 12;
++	int transform_count = transform_data.size()/t_size;
++	if (transform_count < 2) {
++		print_line("W: Too few transforms!");
++	}
+ 
+ 	// Triangulate polygon shape.
+ 	Vector<Point2> shape_polygon = polygon;
+@@ -40,8 +45,6 @@ CSGBrush *CSGAlongTransform::_build_brush() {
+ 	}
+ 
+ 
+-	int t_size = 12;
+-	int transform_count = transform_data.size()/t_size;
+ 	Vector<Transform3D> ts;
+ 	ts.resize(transform_count);
+ 	for (int i = 0; i < transform_count; i++) {
+-- 
+2.46.2.windows.1
+

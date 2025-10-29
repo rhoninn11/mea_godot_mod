@@ -1,0 +1,64 @@
+From 98d8498e37c3b5549ead0f5e5d491a8355588298 Mon Sep 17 00:00:00 2001
+From: Leszek <rhoninn11@gmail.com>
+Date: Wed, 8 Oct 2025 07:41:08 +0200
+Subject: [PATCH 2/2] - to analyze errors
+
+---
+ modules/csg/csg_customs.cpp    | 7 ++++++-
+ modules/csg/csg_customs.h      | 1 +
+ modules/csg/register_types.cpp | 2 ++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/modules/csg/csg_customs.cpp b/modules/csg/csg_customs.cpp
+index caf9fe720d1..3ff91290c0d 100644
+--- a/modules/csg/csg_customs.cpp
++++ b/modules/csg/csg_customs.cpp
+@@ -15,6 +15,11 @@ inline Transform3D as_transform(PackedFloat32Array farr) {
+ 
+ CSGBrush *CSGAlongTransform::_build_brush() {
+ 	CSGBrush *new_brush = memnew(CSGBrush);
++	if (mode == Mode::PREP_MODE ){
++		print_line("W: Execute in prep mode !!!");
++		return new_brush;
++	}
++	
+ 	if (polygon.size() < 3) {
+ 		return new_brush;
+ 	}
+@@ -140,7 +145,7 @@ CSGBrush *CSGAlongTransform::_build_brush() {
+ 		int x1 = (x0 + 1) % transform_count;
+ 		current_xform = ts[x1];
+ 
+-		print_line(x0, x1, previous_xform, current_xform);
++		// print_line(x0, x1, previous_xform, current_xform);
+ 
+ 		double u0 = (x0 - faces_combined) * u_step;
+ 		double u1 = ((x0 + 1) * u_step);
+diff --git a/modules/csg/csg_customs.h b/modules/csg/csg_customs.h
+index b0e20fabfb5..3a50cc6510a 100644
+--- a/modules/csg/csg_customs.h
++++ b/modules/csg/csg_customs.h
+@@ -8,6 +8,7 @@ class CSGAlongTransform : public CSGPrimitive3D {
+ 
+ public:
+ 	enum Mode {
++		PREP_MODE,
+ 		MODE_PATH
+ 	};
+ 
+diff --git a/modules/csg/register_types.cpp b/modules/csg/register_types.cpp
+index 70bbb0e0741..0bb6e811ab2 100644
+--- a/modules/csg/register_types.cpp
++++ b/modules/csg/register_types.cpp
+@@ -49,6 +49,8 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
+ 		GDREGISTER_CLASS(CSGPolygon3D);
+ 		GDREGISTER_CLASS(CSGCombiner3D);
+ 		GDREGISTER_CLASS(CSGAlongTransform);
++
++		std::string info = "new content added%";
+ 		CSGShape3D::navmesh_parse_init();
+ 	}
+ #ifdef TOOLS_ENABLED
+-- 
+2.40.0.windows.1
+
