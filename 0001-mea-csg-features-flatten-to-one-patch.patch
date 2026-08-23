@@ -1,21 +1,21 @@
-From 97c6477517a75658aa85da60cf5081dc50dfab95 Mon Sep 17 00:00:00 2001
+From 460a4893e5b33c89252bb3cc1bbfefe831c08543 Mon Sep 17 00:00:00 2001
 From: Leszek <rhoninn11@gmail.com>
 Date: Fri, 3 Oct 2025 20:49:28 +0200
-Subject: [PATCH 1/2] - added csg features
+Subject: [PATCH] - mea csg features flatten to one patch
 
 ---
  modules/csg/config.py                         |   1 +
- modules/csg/csg_customs.cpp                   | 501 ++++++++++++++++++
- modules/csg/csg_customs.h                     | 106 ++++
+ modules/csg/csg_customs.cpp                   | 509 ++++++++++++++++++
+ modules/csg/csg_customs.h                     | 107 ++++
  modules/csg/doc_classes/CSGAlongTransform.xml |  20 +
- modules/csg/register_types.cpp                |   2 +
- 5 files changed, 630 insertions(+)
+ modules/csg/register_types.cpp                |   4 +
+ 5 files changed, 641 insertions(+)
  create mode 100644 modules/csg/csg_customs.cpp
  create mode 100644 modules/csg/csg_customs.h
  create mode 100644 modules/csg/doc_classes/CSGAlongTransform.xml
 
 diff --git a/modules/csg/config.py b/modules/csg/config.py
-index 3991b846f96..d045cf7d20f 100644
+index 3991b846f9..d045cf7d20 100644
 --- a/modules/csg/config.py
 +++ b/modules/csg/config.py
 @@ -17,6 +17,7 @@ def get_doc_classes():
@@ -28,20 +28,20 @@ index 3991b846f96..d045cf7d20f 100644
  
 diff --git a/modules/csg/csg_customs.cpp b/modules/csg/csg_customs.cpp
 new file mode 100644
-index 00000000000..caf9fe720d1
+index 0000000000..7c497954e4
 --- /dev/null
 +++ b/modules/csg/csg_customs.cpp
-@@ -0,0 +1,501 @@
+@@ -0,0 +1,509 @@
 +#include "csg_customs.h"
 +#include "core/math/triangulate.h"
 +#include "core/math/geometry_2d.h"
 +
 +inline Transform3D as_transform(PackedFloat32Array farr) {
 +	Vector3 vs[4] = {
-+		Vector3(farr[0], farr[1], farr[2]),
-+		Vector3(farr[3], farr[4], farr[5]),
-+		Vector3(farr[6], farr[7], farr[8]),
-+		Vector3(farr[9], farr[10], farr[11]),
++		Vector3(farr[0], farr[4], farr[8]),
++		Vector3(farr[1], farr[5], farr[9]),
++		Vector3(farr[2], farr[6], farr[10]),
++		Vector3(farr[3], farr[7], farr[11]),
 +	};
 +
 +	return Transform3D(vs[0], vs[1], vs[2], vs[3]);
@@ -49,8 +49,18 @@ index 00000000000..caf9fe720d1
 +
 +CSGBrush *CSGAlongTransform::_build_brush() {
 +	CSGBrush *new_brush = memnew(CSGBrush);
++	if (mode == Mode::PREP_MODE ){
++		print_line("W: Execute in prep mode !");
++		return new_brush;
++	}
++	
 +	if (polygon.size() < 3) {
 +		return new_brush;
++	}
++	constexpr int t_size = 12;
++	int transform_count = transform_data.size()/t_size;
++	if (transform_count < 2) {
++		print_line("W: Too few transforms!");
 +	}
 +
 +	// Triangulate polygon shape.
@@ -69,8 +79,6 @@ index 00000000000..caf9fe720d1
 +	}
 +
 +
-+	int t_size = 12;
-+	int transform_count = transform_data.size()/t_size;
 +	Vector<Transform3D> ts;
 +	ts.resize(transform_count);
 +	for (int i = 0; i < transform_count; i++) {
@@ -174,7 +182,7 @@ index 00000000000..caf9fe720d1
 +		int x1 = (x0 + 1) % transform_count;
 +		current_xform = ts[x1];
 +
-+		print_line(x0, x1, previous_xform, current_xform);
++		// print_line(x0, x1, previous_xform, current_xform);
 +
 +		double u0 = (x0 - faces_combined) * u_step;
 +		double u1 = ((x0 + 1) * u_step);
@@ -536,10 +544,10 @@ index 00000000000..caf9fe720d1
 \ No newline at end of file
 diff --git a/modules/csg/csg_customs.h b/modules/csg/csg_customs.h
 new file mode 100644
-index 00000000000..b0e20fabfb5
+index 0000000000..3a50cc6510
 --- /dev/null
 +++ b/modules/csg/csg_customs.h
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,107 @@
 +#pragma once
 +
 +#include "csg.h"
@@ -550,6 +558,7 @@ index 00000000000..b0e20fabfb5
 +
 +public:
 +	enum Mode {
++		PREP_MODE,
 +		MODE_PATH
 +	};
 +
@@ -649,7 +658,7 @@ index 00000000000..b0e20fabfb5
 \ No newline at end of file
 diff --git a/modules/csg/doc_classes/CSGAlongTransform.xml b/modules/csg/doc_classes/CSGAlongTransform.xml
 new file mode 100644
-index 00000000000..ac5b810eff1
+index 0000000000..ac5b810eff
 --- /dev/null
 +++ b/modules/csg/doc_classes/CSGAlongTransform.xml
 @@ -0,0 +1,20 @@
@@ -674,7 +683,7 @@ index 00000000000..ac5b810eff1
 +	</members>
 +</class>
 diff --git a/modules/csg/register_types.cpp b/modules/csg/register_types.cpp
-index 465ede4ced8..70bbb0e0741 100644
+index 465ede4ced..0bb6e811ab 100644
 --- a/modules/csg/register_types.cpp
 +++ b/modules/csg/register_types.cpp
 @@ -31,6 +31,7 @@
@@ -685,14 +694,16 @@ index 465ede4ced8..70bbb0e0741 100644
  
  #ifdef TOOLS_ENABLED
  #include "editor/csg_gizmos.h"
-@@ -47,6 +48,7 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
+@@ -47,6 +48,9 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
  		GDREGISTER_CLASS(CSGTorus3D);
  		GDREGISTER_CLASS(CSGPolygon3D);
  		GDREGISTER_CLASS(CSGCombiner3D);
 +		GDREGISTER_CLASS(CSGAlongTransform);
++
++		std::string info = "new content added%";
  		CSGShape3D::navmesh_parse_init();
  	}
  #ifdef TOOLS_ENABLED
 -- 
-2.40.0.windows.1
+2.50.1
 
