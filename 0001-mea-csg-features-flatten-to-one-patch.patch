@@ -1,6 +1,6 @@
-From 460a4893e5b33c89252bb3cc1bbfefe831c08543 Mon Sep 17 00:00:00 2001
-From: Leszek <rhoninn11@gmail.com>
-Date: Fri, 3 Oct 2025 20:49:28 +0200
+From db280e298c30b505a034425a8865295c173621e8 Mon Sep 17 00:00:00 2001
+From: ola1 <essa@ola.pl>
+Date: Sun, 23 Aug 2026 18:26:12 +0200
 Subject: [PATCH] - mea csg features flatten to one patch
 
 ---
@@ -683,7 +683,7 @@ index 0000000000..ac5b810eff
 +	</members>
 +</class>
 diff --git a/modules/csg/register_types.cpp b/modules/csg/register_types.cpp
-index 465ede4ced..0bb6e811ab 100644
+index 57347ef946..c22e6730fa 100644
 --- a/modules/csg/register_types.cpp
 +++ b/modules/csg/register_types.cpp
 @@ -31,6 +31,7 @@
@@ -692,18 +692,18 @@ index 465ede4ced..0bb6e811ab 100644
  #include "csg_shape.h"
 +#include "csg_customs.h"
  
- #ifdef TOOLS_ENABLED
- #include "editor/csg_gizmos.h"
-@@ -47,6 +48,9 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
+ #include "core/object/class_db.h"
+ 
+@@ -49,6 +50,9 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
  		GDREGISTER_CLASS(CSGTorus3D);
  		GDREGISTER_CLASS(CSGPolygon3D);
  		GDREGISTER_CLASS(CSGCombiner3D);
 +		GDREGISTER_CLASS(CSGAlongTransform);
 +
 +		std::string info = "new content added%";
+ #ifndef NAVIGATION_3D_DISABLED
  		CSGShape3D::navmesh_parse_init();
- 	}
- #ifdef TOOLS_ENABLED
+ #endif // NAVIGATION_3D_DISABLED
 -- 
 2.50.1
 
