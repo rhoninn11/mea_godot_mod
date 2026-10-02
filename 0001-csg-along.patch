@@ -1,21 +1,21 @@
-From db280e298c30b505a034425a8865295c173621e8 Mon Sep 17 00:00:00 2001
+From eeafb4848b82c9c97c4da40afbb395d158ce739c Mon Sep 17 00:00:00 2001
 From: ola1 <essa@ola.pl>
 Date: Sun, 23 Aug 2026 18:26:12 +0200
-Subject: [PATCH] - mea csg features flatten to one patch
+Subject: [PATCH] - csg along
 
 ---
  modules/csg/config.py                         |   1 +
- modules/csg/csg_customs.cpp                   | 509 ++++++++++++++++++
+ modules/csg/csg_customs.cpp                   | 511 ++++++++++++++++++
  modules/csg/csg_customs.h                     | 107 ++++
  modules/csg/doc_classes/CSGAlongTransform.xml |  20 +
- modules/csg/register_types.cpp                |   4 +
- 5 files changed, 641 insertions(+)
+ modules/csg/register_types.cpp                |   3 +
+ 5 files changed, 642 insertions(+)
  create mode 100644 modules/csg/csg_customs.cpp
  create mode 100644 modules/csg/csg_customs.h
  create mode 100644 modules/csg/doc_classes/CSGAlongTransform.xml
 
 diff --git a/modules/csg/config.py b/modules/csg/config.py
-index 3991b846f9..d045cf7d20 100644
+index 3991b846f96..d045cf7d20f 100644
 --- a/modules/csg/config.py
 +++ b/modules/csg/config.py
 @@ -17,6 +17,7 @@ def get_doc_classes():
@@ -28,13 +28,15 @@ index 3991b846f9..d045cf7d20 100644
  
 diff --git a/modules/csg/csg_customs.cpp b/modules/csg/csg_customs.cpp
 new file mode 100644
-index 0000000000..7c497954e4
+index 00000000000..aca7c758b12
 --- /dev/null
 +++ b/modules/csg/csg_customs.cpp
-@@ -0,0 +1,509 @@
+@@ -0,0 +1,511 @@
 +#include "csg_customs.h"
 +#include "core/math/triangulate.h"
 +#include "core/math/geometry_2d.h"
++#include "core/object/callable_mp.h"
++#include "core/object/class_db.h"
 +
 +inline Transform3D as_transform(PackedFloat32Array farr) {
 +	Vector3 vs[4] = {
@@ -544,7 +546,7 @@ index 0000000000..7c497954e4
 \ No newline at end of file
 diff --git a/modules/csg/csg_customs.h b/modules/csg/csg_customs.h
 new file mode 100644
-index 0000000000..3a50cc6510
+index 00000000000..3a50cc6510a
 --- /dev/null
 +++ b/modules/csg/csg_customs.h
 @@ -0,0 +1,107 @@
@@ -658,7 +660,7 @@ index 0000000000..3a50cc6510
 \ No newline at end of file
 diff --git a/modules/csg/doc_classes/CSGAlongTransform.xml b/modules/csg/doc_classes/CSGAlongTransform.xml
 new file mode 100644
-index 0000000000..ac5b810eff
+index 00000000000..ac5b810eff1
 --- /dev/null
 +++ b/modules/csg/doc_classes/CSGAlongTransform.xml
 @@ -0,0 +1,20 @@
@@ -683,7 +685,7 @@ index 0000000000..ac5b810eff
 +	</members>
 +</class>
 diff --git a/modules/csg/register_types.cpp b/modules/csg/register_types.cpp
-index 57347ef946..c22e6730fa 100644
+index 57347ef946c..cbbe1951b41 100644
 --- a/modules/csg/register_types.cpp
 +++ b/modules/csg/register_types.cpp
 @@ -31,6 +31,7 @@
@@ -694,13 +696,12 @@ index 57347ef946..c22e6730fa 100644
  
  #include "core/object/class_db.h"
  
-@@ -49,6 +50,9 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
+@@ -49,6 +50,8 @@ void initialize_csg_module(ModuleInitializationLevel p_level) {
  		GDREGISTER_CLASS(CSGTorus3D);
  		GDREGISTER_CLASS(CSGPolygon3D);
  		GDREGISTER_CLASS(CSGCombiner3D);
 +		GDREGISTER_CLASS(CSGAlongTransform);
 +
-+		std::string info = "new content added%";
  #ifndef NAVIGATION_3D_DISABLED
  		CSGShape3D::navmesh_parse_init();
  #endif // NAVIGATION_3D_DISABLED
